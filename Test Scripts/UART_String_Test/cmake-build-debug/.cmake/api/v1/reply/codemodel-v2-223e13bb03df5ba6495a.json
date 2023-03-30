@@ -1,0 +1,60 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.21"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "UART_String_Test",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "UART_String_Test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-UART_String_Test-Debug-c0d91e1d78101108b56c.json",
+					"name" : "UART_String_Test",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/Drew/Documents/EELE465 Project 5 Master Code/EELE465-Project-5-Master-Code/Test Scripts/UART_String_Test/cmake-build-debug",
+		"source" : "C:/Users/Drew/Documents/EELE465 Project 5 Master Code/EELE465-Project-5-Master-Code/Test Scripts/UART_String_Test"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 3
+	}
+}

@@ -1,0 +1,5 @@
+# ninja log v5
+0	48	7018613118510723	CMakeFiles/UART_String_Test.dir/main.c.obj	30ba72c282d4a9f3
+49	135	7018613119347704	UART_String_Test.exe	e9ef665f007ebf25
+1	52	7018615341416640	CMakeFiles/UART_String_Test.dir/main.c.obj	30ba72c282d4a9f3
+52	132	7018615342179015	UART_String_Test.exe	e9ef665f007ebf25
