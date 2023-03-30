@@ -16,19 +16,23 @@ extern int I2C_Message_Counter;
 extern char I2C_Message_Global[32];
 
 void Setup_I2C_Module(void){
+    UCB1CTLW0 |= UCSWRST;
     UCB1CTLW0 |= UCSSEL_3;
     UCB1BRW = 10;
+
     UCB1CTLW0 |= UCMODE_3;
     UCB1CTLW0 |= UCMST;
+    UCB1CTLW0 |= UCTR;
+
     UCB1CTLW1 |= UCASTP_2;
 
-    // I/O Ports
-    // configure ports
-    P4SEL1 & -~BIT7; // Want P4.7 = SCL
+    P4SEL1 &= ~BIT7;
     P4SEL0 |= BIT7;
 
-    P4SEL1 & -~BIT6; // Want P4.6 = SDA
+    P4SEL1 &= ~BIT6;
     P4SEL0 |= BIT6;
+
+    PM5CTL0 &= ~LOCKLPM5;
 
     UCB1CTLW0 &= ~UCSWRST;
 
@@ -39,7 +43,7 @@ void Setup_I2C_Module(void){
 
 
 
-void Send_I2C_Message(char* I2C_Message, int Slave_Address){
+void Send_I2C_Message(int Slave_Address, char* I2C_Message){
     I2C_Message_Counter = 0;
     int Message_Length = (sizeof(I2C_Message) - 1);
     strcpy(I2C_Message_Global, I2C_Message);

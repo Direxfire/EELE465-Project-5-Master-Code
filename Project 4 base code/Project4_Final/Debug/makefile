@@ -11,6 +11,8 @@ GEN_CMDS__FLAG :=
 
 ORDERED_OBJS += \
 "./I2C_Communication.obj" \
+"./LockControl.obj" \
+"./keypad.obj" \
 "./main.obj" \
 "../lnk_msp430fr2355.cmd" \
 $(GEN_CMDS__FLAG) \
@@ -156,8 +158,8 @@ Project4_Final.hex: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "I2C_Communication.obj" "main.obj" 
-	-$(RM) "I2C_Communication.d" "main.d" 
+	-$(RM) "I2C_Communication.obj" "LockControl.obj" "keypad.obj" "main.obj" 
+	-$(RM) "I2C_Communication.d" "LockControl.d" "keypad.d" "main.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 

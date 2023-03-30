@@ -26,7 +26,7 @@ int Passcode_Inputs[5] = {0,0,0,0,0};       //Three digit passcode, the last val
 int Input_Counter = 0;
 int Temp_In[2] = {0,0};
 int Status = 1;
-int Input_Arr[3] = {0,0,0};
+char Input_Arr[3] = {0,0,0};
 int New_Input = 0;
 
 
@@ -40,10 +40,10 @@ void Time_Out(void);
 int Locked_Status(void);
 int Unlocked_Status(void);
 //Program flow globals
-char Locked_Code;
-char* Locked_Code_ptr = Locked_Code;
-char Unlocked_ASCII;
-char* Unlocked_ASCII_ptr = Unlocked_ASCII;
+char Locked_Code[1];
+char *Locked_Code_ptr = Locked_Code;
+char Unlocked_ASCII[1];
+char *Unlocked_ASCII_ptr = Unlocked_ASCII;
 
 int Unlocked_Input;
 
