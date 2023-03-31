@@ -16,7 +16,9 @@ void Setup_TimerB0_A2D(int Timer_Period){
    TB0CTL |= TBCLR;                         //Clear timers and dividers
    TB0CTL |= TBSSEL__SMCLK;                 //Source is SMCLOCK (1Mhz)
    TB0CTL |= MC__STOP;                      //Put timer into stop mode, change after sample size collected
-   TB0CCR0 = Timer_Period;                  //Set CCR0 to the value put into this function
+   TB0CTL |= ID__8;
+   TB0EX0 |= TBIDEX__4;
+   TB0CCR0 = 10944;                       //Set CCR0 to the value put into this function
 
    TB0CCTL0 |= CCIE;                        //Enable CCR0 interrupt
    TB0CCTL0 &= ~CCIFG;                      //Clear interrupt flag

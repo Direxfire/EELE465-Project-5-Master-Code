@@ -6,13 +6,13 @@
 
 
 #define LM19_PIN    BIT0
-#define third_second_timer_period 33333
+#define third_second_timer_period 333333
 
 
 #define Test_LED BIT6
 
 void Setup_I2C_Module(void);
-void Send_I2C_Message(char*, int);
+void Send_I2C_Message(char*, int, int);
 void Setup_Keypad_Ports(void);
 char Decode_Input(int);
 
@@ -70,9 +70,9 @@ struct Temperature {
     int Raw_Value;
 };
 
-struct Temperature Temperature_Array[5];
+struct Temperature Temperature_Array[9];
 
-char Temperature_Write_Out[16];
+char Temperature_Write_Out[8];
 char *Temperature_Write_Out_ptr = Temperature_Write_Out;
 int Samples = 0;
 int  New_Temp_Value;
@@ -81,6 +81,8 @@ float Rolling_Average;
 char Rolling_Average_ASCII[4];
 char *Rolling_Average_ASCII_ptr = Rolling_Average_ASCII;
 float Real_Analog_Value;
+int Sample_Size = 0;
+int Rolling_Average_Unlocked = 0;
 /*
 
  Gary's A2D variables
@@ -172,8 +174,23 @@ int main(void)
 	// The system can sit in either the Locked_Status or the Unlocked_Status infinately.
 	//Testing to make sure the program reaches the main loop setting the P6.6 LED on
 	P6DIR |= Test_LED;
-	P6OUT |= Test_LED;
-	//Putting timerB0 into UP mode for testing...
+
+	//Put status = 0 to get a single char from the keypad press
+	Status = 0;
+    P1IE |= 0xF;
+	while(Sample_Size == 0){
+		//Do nothing 
+		if(New_Input == 1){
+			//If keypad pressed...
+			*Unlocked_ASCII_ptr = Decode_Input(Unlocked_Input);
+			sscanf(Unlocked_ASCII_ptr, "%d", &Sample_Size);
+			//Sample_Size = (int)(Unlocked_ASCII);
+            Send_I2C_Message(0x048, Unlocked_ASCII_ptr, 0);
+			New_Input = 0;
+			break;
+		}
+	}
+
 	TB0CTL |= MC__UP;                      //Put timer into UP mode for testing. 
 	int j;
 	while (1)
@@ -183,13 +200,24 @@ int main(void)
 		int Unlocked = Locked_Status();
 		Unlocked = Unlocked_Status();
 		*/
+	    P1IE |= 0xF;
+
 		if(Fresh_Data == 1){
             Fresh_Data = 0;
 			Process_Temperature_Data(Raw_Temp);
             snprintf(UART_Message_Global, 100, "Current temperature raw data is: %d. \n\r", Raw_Temp);
-
-		       Send_UART_Message();
-		       for(j = 0; j < 10000; j++){}		}
+		    Send_UART_Message();
+		    for(j = 0; j < 10000; j++){}		
+			}
+		if(New_Input == 1){
+			*Unlocked_ASCII_ptr = Decode_Input(Unlocked_Input);
+			if(*Unlocked_ASCII_ptr = 'A' | 'B'| 'C' | 'D'){
+				Send_I2C_Message(0x058, Unlocked_ASCII_ptr,0);
+			}
+			else{}
+			New_Input = 0;
+		}
+		else{}
 
 	}
 	return 0;
@@ -258,17 +286,17 @@ void Process_Temperature_Data(int New_Temp_Value){
     //snprintf(Temperature_Array[Sample_Number].Kelvin, 4, "%d", Kelvin_Value);
     //End of the processing of the value.
 
-
-    Sample_Number = Sample_Number + 1;
-    if(Sample_Number > Samples){
-        Sample_Number = 0;
+	if(Sample_Number == Sample_Size-1){
+		Rolling_Average_Unlocked = 1; 
+	}
+    if(Rolling_Average_Unlocked == 1){
         //TODO add average here.... DONE??
         int i;
         Rolling_Average = 0;
-        for (i = 0; i <= Samples; i++){
+        for (i = 0; i <= Sample_Size-1; i++){
         Rolling_Average = Temperature_Array[i].Celsius_Float + Rolling_Average;
         }
-        Rolling_Average = Rolling_Average / Samples;
+        Rolling_Average = Rolling_Average / Sample_Size;
         int whole_num = (int) Rolling_Average;
         int frac_num = (int) ((Rolling_Average - whole_num) * 100); // multiply by 100 to get 2 decimal places
         itoa(whole_num, buffer);
@@ -278,12 +306,23 @@ void Process_Temperature_Data(int New_Temp_Value){
         Rolling_Average_ASCII[2] = buffer[0];
 
         //TODO create snprintf like below with average.
-        snprintf(Temperature_Write_Out, 100, "%c%c.%c\n%c%c%c\n%c%c.%c\n", Temperature_Array[Sample_Number].Upper_Bit[0], Temperature_Array[Sample_Number].Upper_Bit[1], Temperature_Array[Sample_Number].Lower_Bit, Temperature_Array[Sample_Number].Kelvin[0], Temperature_Array[Sample_Number].Kelvin[1], Temperature_Array[Sample_Number].Kelvin[2], Rolling_Average_ASCII[0], Rolling_Average_ASCII[1], Rolling_Average_ASCII[2]);
+        //snprintf(Temperature_Write_Out, 100, "%c%c.%c\n%c%c%c\n%c%c.%c\n", Temperature_Array[Sample_Number].Upper_Bit[0], Temperature_Array[Sample_Number].Upper_Bit[1], Temperature_Array[Sample_Number].Lower_Bit, Temperature_Array[Sample_Number].Kelvin[0], Temperature_Array[Sample_Number].Kelvin[1], Temperature_Array[Sample_Number].Kelvin[2], Rolling_Average_ASCII[0], Rolling_Average_ASCII[1], Rolling_Average_ASCII[2]);
+        snprintf(Temperature_Write_Out, 100, "%c%c.%c\n%c%c%c\n", Rolling_Average_ASCII[0], Rolling_Average_ASCII[1], Rolling_Average_ASCII[2], Temperature_Array[Sample_Number].Kelvin[0], Temperature_Array[Sample_Number].Kelvin[1], Temperature_Array[Sample_Number].Kelvin[2]);
+        Send_I2C_Message(0x048, Temperature_Write_Out_ptr, 1);
+		//Increment sample number
 
+		Sample_Number = 0;
     }
     //Create string of values if samples has not reached the threshold without the average
-    snprintf(Temperature_Write_Out, 100, "%c%c.%c\n%c%c%c\n\n", Temperature_Array[Sample_Number].Upper_Bit[0], Temperature_Array[Sample_Number].Upper_Bit[1], Temperature_Array[Sample_Number].Lower_Bit, Temperature_Array[Sample_Number].Kelvin[0], Temperature_Array[Sample_Number].Kelvin[1], Temperature_Array[Sample_Number].Kelvin[2]);
-    Send_I2C_Message(0x048, Temperature_Write_Out_ptr);
+    //snprintf(Temperature_Write_Out, 100, "%c%c.%c%c%c%c\n", Temperature_Array[Sample_Number].Upper_Bit[0], Temperature_Array[Sample_Number].Upper_Bit[1], Temperature_Array[Sample_Number].Lower_Bit, Temperature_Array[Sample_Number].Kelvin[0], Temperature_Array[Sample_Number].Kelvin[1], Temperature_Array[Sample_Number].Kelvin[2]);
+    //Send_I2C_Message(0x048, Temperature_Write_Out_ptr);
+	if(Sample_Number == Sample_Size-1){
+		Sample_Number = 0;
+	}
+	else{
+		Sample_Number = Sample_Number + 1;
+	}
+
 }
 
 float Convert_to_Celsius (float V0){
@@ -315,7 +354,14 @@ Interrupt Service Routines
 
 //I2C Transmit intterupt vector
 //Used to send data out the master
+#pragma vector = EUSCI_B1_VECTOR
+__interrupt void EUSCI_B1_I2C_ISR(void)
+{
+	//Send I2C Message
+	UCB1TXBUF = I2C_Message_Global[I2C_Message_Counter];		//Send the next byte in the I2C_Message_Global string
+	I2C_Message_Counter++;										//Increase the message position counter
 
+}
 
 
 //Keypad interrupt vector
@@ -428,7 +474,7 @@ __interrupt void ISR_Keypad_Pressed(void)
 #pragma vector = TIMER0_B0_VECTOR
 __interrupt void Sample_Timer(void) {
 
-
+    //TB0CTL |= MC__STOP;
     float voltage = 0;
     float temperature = 0;
     float average = 0;
@@ -446,6 +492,7 @@ int samples[10];          // array to store the last n samples
     while (ADCCTL1 & ADCBUSY);
     Raw_Temp = ADCMEM0;
     Fresh_Data = 1;
+    P6OUT ^= Test_LED;
 
 /* This doesn't work...See temperature.c for updated code
 //Below is the conversion of the values brought in

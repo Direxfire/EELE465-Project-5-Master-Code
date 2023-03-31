@@ -43,14 +43,18 @@ void Setup_I2C_Module(void){
 
 
 
-void Send_I2C_Message(int Slave_Address, char* I2C_Message){
+void Send_I2C_Message(int Slave_Address, char* I2C_Message, int Mode){
     I2C_Message_Counter = 0;
-    int Message_Length = (sizeof(I2C_Message) - 1);
+    if(Mode == 1){
+        UCB1TBCNT = 9; //Set the buffer size to the size of the input char* I2C_Message ie how many bytes to send via I2C
+    }
+    else{
+        UCB1TBCNT = 1; //Set the buffer size to the size of the input char* I2C_Message ie how many bytes to send via I2C
+    }
     strcpy(I2C_Message_Global, I2C_Message);
 
 
     UCB1I2CSA = Slave_Address;  //Set the slave address in the module equal to the input slave address
-    UCB1TBCNT = Message_Length; //Set the buffer size to the size of the input char* I2C_Message ie how many bytes to send via I2C
     UCB1CTLW0 |= UCTR;       //Put into transmit mode
     UCB1CTLW0 |= UCTXSTT;   //Generate the start condition
     int i;
