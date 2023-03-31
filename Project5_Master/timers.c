@@ -3,7 +3,7 @@
 //Setting up timers to trigger the .333 second analog read in 
 
 
-void Setup_TimerB0_A2D(int Timer_Period){
+void Setup_TimerB0_A2D(void){
     /*
     // configure TimerA for interrupts
     TA0CTL |= TASSEL_2 | ID_3 | MC_1 | TACLR;
